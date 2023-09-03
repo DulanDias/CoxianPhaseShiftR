@@ -33,8 +33,5 @@ fitCoxian <- function(data, n_phases) {
   # Compute the Akaike Information Criterion (AIC)
   aic <- coxianAic(data, lambda, mu)
 
-  # Perform the Kolmogorov-Smirnov test
-  ks_test <- ksTestCoxian(data, lambda, mu)
-
-  return(list(lambda = lambda, mu = mu, negative_log_likelihood = nll, ssd = ssd, AIC = aic, ks_test = ks_test))
+  return(list(lambda = lambda, mu = mu, negative_log_likelihood = nll, ssd = ssd, AIC = aic))
 }
