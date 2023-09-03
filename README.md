@@ -25,7 +25,7 @@ data_sample <- rexp(100, rate = 0.5)
 fit_results <- fitCoxian(data_sample, 2)
 ```
 
-Documentation
+## Documentation
 For detailed function documentation, after installing and loading the package, use:
 ```
 ?function_name
