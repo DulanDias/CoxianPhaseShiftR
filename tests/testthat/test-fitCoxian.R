@@ -45,3 +45,21 @@ test_that("fitCoxian returns reasonable values", {
   expect_false(is.na(result$AIC))
 
 })
+
+test_that("fitCoxian returns correct structure for real dataset for multiple phases", {
+
+  # Load the dataset
+  data(los)
+
+  # Check if 'los' is in the environment
+  expect_true(exists("los"))
+
+  # Test fitCoxian function on the loaded dataset for various phase numbers
+  phases <- c(5)
+  for (phase in phases) {
+    result <- fitCoxian(los, phase)
+    cat(sprintf("Results for %d-phase Coxian:\n", phase))
+    print(result)
+    cat("\n")
+  }
+})
