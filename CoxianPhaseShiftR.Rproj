@@ -17,4 +17,5 @@ StripTrailingWhitespace: Yes
 
 BuildType: Package
 PackageUseDevtools: Yes
+PackagePath: C:/Users/40280170/OneDrive - Queen's University Belfast/Documents/R/CoxianPhaseShiftR
 PackageInstallArgs: --no-multiarch --with-keep.source
