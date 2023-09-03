@@ -26,3 +26,26 @@ test_that("coxianPdf handles errors gracefully", {
   expect_error(coxianPdf(1, lambda, mu), "Length of lambda and mu should be the same")
 
 })
+
+test_that("coxianPdf does not produce NaN or 0 values", {
+
+  # Sample lambda and mu values
+  lambda_sample <- c(0.5, 0.3)
+  mu_sample <- c(0.2, 0.4)
+
+  # Generate sample data
+  data_sample <- rexp(100, rate = 0.5)
+
+  # Compute the PDF values
+  pdf_values <- sapply(data_sample, function(x) {
+    coxianPdf(x, lambda_sample, mu_sample)
+  })
+
+  # Check for NaN values
+  expect_false(any(is.nan(pdf_values)),
+               info = "coxianPdf produced NaN values.")
+
+  # Check for 0 values
+  expect_false(any(pdf_values == 0),
+               info = "coxianPdf produced 0 values.")
+})
