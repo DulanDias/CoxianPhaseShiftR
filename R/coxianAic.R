@@ -16,7 +16,7 @@
 #'
 #' @export
 coxianAic <- function(data, lambda, mu) {
-  log_likelihood <- sum(sapply(data, function(x) log(coxian_pdf(x, lambda, mu))))
+  log_likelihood <- sum(sapply(data, function(x) log(coxianPdf(x, lambda, mu))))
   k <- length(lambda) + length(mu)  # number of parameters
   -2 * log_likelihood + 2 * k
 }
