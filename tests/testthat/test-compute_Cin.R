@@ -1,3 +1,4 @@
+library(testthat)
 context("Testing compute_Cin")
 
 test_that("compute_Cin returns correct values", {

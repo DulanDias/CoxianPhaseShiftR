@@ -1,3 +1,4 @@
+library(testthat)
 context("Testing compute_pn")
 
 test_that("compute_pn returns correct values", {

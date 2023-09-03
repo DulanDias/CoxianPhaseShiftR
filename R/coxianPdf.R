@@ -16,7 +16,7 @@
 #' print(pdf_value)
 #'
 #' @export
-coxian_pdf <- function(t, lambda, mu) {
+coxianPdf <- function(t, lambda, mu) {
   m <- length(lambda)
 
   # Compute the outer sum

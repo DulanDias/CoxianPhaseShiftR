@@ -10,7 +10,7 @@
 #'   \item \code{lambda_initial} - Initial lambda values.
 #'   \item \code{mu_initial} - Initial mu values.
 #' }
-initializeParameters <- function(data, phases) {
+initialize_parameters <- function(data, phases) {
 lambda_initial <- runif(phases)
 mu_initial <- runif(phases)
 
