@@ -24,6 +24,11 @@ optimize <- function(data, init_lambda, init_mu, optim_method = "BFGS") {
     stop("Length of init_lambda and init_mu should be the same.")
   }
 
+  # Ensure the last term of init_lambda is 0
+  if (tail(init_lambda, n = 1) != 0) {
+    stop("The last term of init_lambda should be 0.")
+  }
+
   # Objective function to be minimized
   objective_function <- function(params) {
     lambda <- c(params[1:(length(init_lambda) - 1)], 0)  # Set the last lambda value to 0

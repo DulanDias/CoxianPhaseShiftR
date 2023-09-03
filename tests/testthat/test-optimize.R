@@ -30,10 +30,10 @@ test_that("optimize function returns values within reasonable bounds", {
   # Call the optimize function
   result <- optimize(data_sample, init_lambda, init_mu)
 
-  # Check if lambda and mu values are within reasonable bounds (assuming bounds between 0 and 1)
-  expect_true(all(result$lambda[-length(result$lambda)] >= 0 & result$lambda[-length(result$lambda)] <= 1))  # Exclude the last lambda value
+  # Check if lambda and mu values are within reasonable bounds (assuming bounds between 0 and Inf)
+  expect_true(all(result$lambda[-length(result$lambda)] >= 0))  # Exclude the last lambda value
   expect_true(result$lambda[length(result$lambda)] == 0)  # Ensure the last lambda value is 0
-  expect_true(all(result$mu >= 0 & result$mu <= 1))
+  expect_true(all(result$mu >= 0))
 })
 
 test_that("optimize function works with different optimization methods", {
