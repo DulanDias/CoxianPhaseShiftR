@@ -23,32 +23,34 @@
 #' @importFrom survival coxph
 #' @export
 progressiveCoxianPhModel <- function(training_data, new_observation, n_phases, current_phase, current_time, strata_by) {
-  # Load necessary packages
-  library(survival)
 
   # Check if current phase is valid
   if(current_phase < 1 || current_phase > n_phases) {
     stop("Current phase must be between 1 and n_phases")
   }
 
+  if(!strata_by %in% colnames(training_data)) {
+    stop(paste("Column", strata_by, "not found in training_data"))
+  }
+
   # Adjust the number of phases based on the current phase
   adjusted_n_phases <- n_phases - current_phase + 1
 
   # Remove data from phases before the current phase
-  training_data <- training_data[training_data[strata_by] >= current_phase, ]
+  training_data <- training_data[training_data[[strata_by]] >= current_phase, ]
 
-  # Adjust the strata_by variable in the training data and new observation to match the new phase numbering
-  training_data[strata_by] <- training_data[strata_by] - current_phase + 1
-  new_observation[strata_by] <- new_observation[strata_by] - current_phase + 1
+  # Adjust the phase variable in the training data and new observation to match the new phase numbering
+  training_data[[strata_by]] <- training_data[[strata_by]] - current_phase + 1
+  new_observation[[strata_by]] <- current_phase
 
   # Fit the Cox PH model with the adjusted number of phases
-  fit_result <- fitCoxPhModel(training_data, "time", "status", strata_by, "patient_id", n_phases = adjusted_n_phases)
+  fit_result <- fitCoxPhModel(training_data, "time", "status", strata_by, "patient_id")
 
   # Estimate the transition rates using the fitted model
   transition_rates <- estimate_transition_rates(fit_result$fit, new_observation, n_phases = adjusted_n_phases, strata_by = strata_by)
 
   # Calculate the PDF of the Coxian phase type model at the given time
-  coxian_pdf <- coxianPdf(current_time, transition_rates$lambda, transition_rates$mu)
+  coxian_pdf <- coxianPdf(current_time, unlist(transition_rates$lambda), unlist(transition_rates$mu))
 
   # Return the calculated PDF
   return(coxian_pdf)
