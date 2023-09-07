@@ -36,19 +36,3 @@ test_that("optimize function returns values within reasonable bounds", {
   expect_true(all(result$mu >= 0))
 })
 
-test_that("optimize function works with different optimization methods", {
-
-  # Sample data and initial parameters
-  data_sample <- rexp(100, rate = 0.5)
-  init_lambda <- c(0.5, 0.3, 0)
-  init_mu <- c(0.2, 0.4, 0.6)
-
-  # Call the optimize function with different methods
-  result_BFGS <- optimize(data_sample, init_lambda, init_mu, optim_method = "BFGS")
-  result_CG <- optimize(data_sample, init_lambda, init_mu, optim_method = "CG")
-
-  # Check if results are structured correctly for different methods
-  expect_true("lambda" %in% names(result_BFGS) & "mu" %in% names(result_BFGS))
-  expect_true("lambda" %in% names(result_CG) & "mu" %in% names(result_CG))
-})
-

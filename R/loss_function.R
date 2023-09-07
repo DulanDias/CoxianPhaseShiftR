@@ -39,7 +39,7 @@ loss_function <- function(lambda, mu, data, method = c("ssd", "nll")) {
 
       # Handle NA values in observed_density
       if (is.na(observed_density) || is.na(expected_density)) {
-        return(Inf)  # Assign a large penalty for NA values
+        return(1e6)  # Assign a large but finite penalty for NA values
       }
 
       return((observed_density - expected_density)^2)
@@ -51,9 +51,14 @@ loss_function <- function(lambda, mu, data, method = c("ssd", "nll")) {
       pdf_value <- coxianPdf(x, lambda, mu)
       log_value <- log(pdf_value)
 
+      # Handle 0 or NA values in pdf_value and log_value
+      if (pdf_value == 0 || is.na(pdf_value) || is.na(log_value)) {
+        return(-1e6)  # Assign a large but finite penalty for 0 or NA values
+      }
+
       # Handle -Inf values in log_value
       if (log_value == -Inf) {
-        return(Inf)  # Assign a large penalty for -Inf values
+        return(1e6)  # Assign a large but finite penalty for -Inf values
       }
 
       return(log_value)
@@ -61,4 +66,5 @@ loss_function <- function(lambda, mu, data, method = c("ssd", "nll")) {
     return(-sum(log_likelihoods))
   }
 }
+
 
