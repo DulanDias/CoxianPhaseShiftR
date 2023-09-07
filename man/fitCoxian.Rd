@@ -4,21 +4,26 @@
 \alias{fitCoxian}
 \title{Fit Coxian Phase Type Distribution to Data}
 \usage{
-fitCoxian(data, n_phases)
+fitCoxian(data, n_phases, objective = "ssd")
 }
 \arguments{
 \item{data}{A numeric vector of observed data points.}
 
 \item{n_phases}{An integer specifying the number of phases for the Coxian distribution.}
+
+\item{objective}{A character string specifying the objective function to be minimized during
+optimization. Can take values "nll" (negative log-likelihood) or "ssd" (sum of squared differences).
+Default is "ssd".}
 }
 \value{
-A list containing the optimized lambda and mu values, negative log-likelihood, sum of squared differences (SSD), Akaike Information Criterion (AIC), and Kolmogorov-Smirnov test results.
+A list containing the optimized lambda and mu values, negative log-likelihood, sum of squared
+  differences (SSD) and Akaike Information Criterion (AIC).
 }
 \description{
 Fits a Coxian phase type distribution to the provided data based on the specified number of phases.
 }
 \examples{
 data_sample <- rexp(100, rate = 0.5)
-fit_results <- fitCoxianPH(data_sample, 2)
+fit_results <- fitCoxian(data_sample, 2, objective = "ssd")
 
 }

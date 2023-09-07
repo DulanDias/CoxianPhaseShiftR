@@ -4,7 +4,7 @@
 \alias{optimize}
 \title{Optimize Parameters for Coxian Phase Type Distribution}
 \usage{
-optimize(data, init_lambda, init_mu, optim_method = "BFGS")
+optimize(data, init_lambda, init_mu, objective = "ssd")
 }
 \arguments{
 \item{data}{A numeric vector of observed data points.}
@@ -13,20 +13,22 @@ optimize(data, init_lambda, init_mu, optim_method = "BFGS")
 
 \item{init_mu}{A numeric vector of initial values for mu.}
 
-\item{optim_method}{A character string specifying the optimization method to be used by `optim`.
-Default is "BFGS".}
+\item{objective}{A character string specifying the objective function to be minimized. Can
+take values "nll" (negative log-likelihood) or "ssd" (sum of squared differences). Default
+is "ssd".}
 }
 \value{
 A list containing the optimized lambda and mu values.
 }
 \description{
 This function optimizes the parameters lambda and mu of a Coxian phase type distribution
-to fit the provided data. The optimization method can be controlled through the `optim_method` parameter.
+to fit the provided data. The objective function to be minimized
+can be controlled through the `objective` parameter.
 }
 \examples{
 data_sample <- rexp(100, rate = 0.5)
 init_lambda <- c(0.5, 0)
 init_mu <- c(0.2, 0.4)
-result <- optimize(data_sample, init_lambda, init_mu)
+result <- optimize(data_sample, init_lambda, init_mu, objective = "nll")
 
 }
