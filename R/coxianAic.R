@@ -16,9 +16,23 @@
 #'
 #' @export
 coxianAic <- function(data, lambda, mu) {
-  epsilon <- .Machine$double.eps^0.25 # A small positive constant to prevent log(0)
-  log_likelihood <- sum(sapply(data, function(x) log(coxianPdf(x, lambda, mu) + epsilon)))
-  k <- length(lambda) + length(mu)  # number of parameters
-  -2 * log_likelihood + 2 * k
-}
+  log_likelihood <- sum(sapply(data, function(x) {
+    pdf_value <- coxianPdf(x, lambda, mu)
 
+    # Handle NaN, 0, or negative values in pdf_value
+    if (is.nan(pdf_value) || pdf_value <= 0) {
+      return(-.Machine$double.xmax) # return the largest negative number representable in R
+    }
+
+    return(log(pdf_value))
+  }))
+
+  k <- length(lambda) + length(mu)  # number of parameters
+  result <- -2 * log_likelihood + 2 * k
+
+  if (is.infinite(result) || is.nan(result)) {
+    return(.Machine$double.xmax) # return the largest number representable in R as a form of penalty
+  }
+
+  return(result)
+}
