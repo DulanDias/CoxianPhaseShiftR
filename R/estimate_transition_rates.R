@@ -1,22 +1,21 @@
 #' Estimate Transition Rates
 #'
-#' This function estimates the transition rates (lambda and mu) for a new observation using the coefficients from a fitted Cox proportional hazards model.
+#' @param coxph_object A coxph object from the fitCoxPhModel function.
+#' @param new_observation A data frame with the covariate values for the new observation.
+#' @param n_phases The number of phases in the Coxian model.
 #'
-#' @param coxph_object A coxph object obtained from fitting a Cox proportional hazards model using the fitCoxPhModel function.
-#' @param new_observation A data frame containing the covariate values for the new observation. The data frame should have the same structure as the input data used to fit the Cox model.
-#'
-#' @return A list containing the estimated lambda and mu values for the new observation.
+#' @return A list containing the estimated lambda and mu values for each phase.
 #'
 #' @examples
 #' \dontrun{
-#'   # Assuming fit_result is a coxph object obtained from the fitCoxPhModel function
+#'   # Assuming fit_result is a coxph object from the fitCoxPhModel function
 #'   # and new_obs is a data frame with the covariate values for the new observation
-#'   transition_rates <- estimate_transition_rates(fit_result, new_obs)
+#'   transition_rates <- estimate_transition_rates(fit_result, new_obs, n_phases = 3)
 #'   print(transition_rates)
 #' }
 #'
 #' @export
-estimate_transition_rates <- function(coxph_object, new_observation) {
+estimate_transition_rates <- function(coxph_object, new_observation, n_phases = NULL, strata_by) {
   # Check if the input is a valid coxph object
   if(!inherits(coxph_object, "coxph")) {
     stop("Input must be a valid coxph object")
@@ -30,21 +29,51 @@ estimate_transition_rates <- function(coxph_object, new_observation) {
   # Extract the coefficients from the coxph object
   cox_coefficients <- coef(coxph_object)
 
-  # Match the names of the coefficients with the column names in the new observation
-  matching_cols <- intersect(names(cox_coefficients), names(new_observation))
+  # Determine the number of phases from the coxph object if not provided
+  if(is.null(n_phases)) {
+    n_phases <- length(unique(coxph_object$strata))
+  }
 
-  # Calculate the linear predictor (X %*% beta)
-  linear_predictor <- sum(new_observation[1, matching_cols] * cox_coefficients[matching_cols])
+  if(!is.numeric(n_phases) || n_phases <= 0) {
+    stop("Number of phases must be a positive integer")
+  }
 
-  # Calculate the baseline hazard function at the specified time
-  baseline_hazard <- basehaz(coxph_object, newdata = new_observation[1, , drop = FALSE])
+  # Initialize lists to store lambda and mu values for each phase
+  lambda_list <- vector("list", n_phases)
+  mu_list <- vector("list", n_phases)
 
-  # Calculate the transition rates
-  # lambda <- exp(linear_predictor) * baseline_hazard$hazard
-  lambda <- exp(linear_predictor)
-  #mu <- exp(-linear_predictor) * baseline_hazard$hazard
-  mu <- exp(-linear_predictor)
+  # Loop through each phase to calculate lambda and mu values
+  for(i in seq_len(n_phases)) {
 
-  # Return the estimated lambda and mu values
-  return(list(lambda = lambda, mu = mu))
+    # Create a new variable in new_observation to match the current phase
+    new_observation[[as.symbol(strata_by)]] <- i
+
+    # Match the names of the coefficients with the column names in the new observation
+    matching_cols <- intersect(names(cox_coefficients), names(new_observation))
+
+    # Calculate the linear predictor (X %*% beta), including interaction terms
+    linear_predictor <- sum(new_observation[1, matching_cols] * cox_coefficients[matching_cols])
+
+    # Calculate the baseline hazard function at the specified time
+    baseline_hazard <- basehaz(coxph_object, newdata = new_observation[1, , drop = FALSE])
+
+    # Calculate the survival function at the specified time
+    surv_fit <- survfit(coxph_object, newdata = new_observation[1, , drop = FALSE])
+
+    # Get the hazard rate at the specified time
+    hazard_rate <- summary(surv_fit, times = new_observation$time[1])$cumhaz
+
+    #print(summary(surv_fit, times = new_observation$time[1]))
+
+    # Calculate the transition rates for the current phase
+    if(i < n_phases) {
+      lambda_list[i] <- exp(linear_predictor) * tail(baseline_hazard$hazard, n = 1) # Transition rate to next phase
+    } else {
+      lambda_list[i] <- 0 # Transition rate to next phase for the last phase is 0
+    }
+    mu_list[i] <- (1 - exp(-tail(baseline_hazard$hazard, n = 1))) * exp(linear_predictor) # Transition rate to absorbing state
+  }
+
+  # Return the estimated lambda and mu values for each phase
+  return(list(lambda = lambda_list, mu = mu_list))
 }

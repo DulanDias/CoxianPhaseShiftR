@@ -38,19 +38,25 @@ fitCoxPhModel <- function(data, time, status, strata_by, cluster_by) {
     stop("Specified columns contain NA values")
   }
 
+  # Determine the number of phases
+  n_phases <- length(unique(data[[strata_by]]))
+
   # Create a Surv object
   data$surv_obj <- Surv(data[[time]], data[[status]])
 
-  # Get the column names to be used as covariates (excluding the specified columns and the created surv_obj column)
+  # Get the column names to be used as covariates
+  # (excluding the specified columns and the created surv_obj column)
   covariate_columns <- setdiff(names(data), c(time, status, strata_by, cluster_by, "surv_obj"))
 
   # Create a formula for the coxph function
   covariate_formula <- paste(covariate_columns, collapse = " + ")
+
+  # Combine the main effects to create the full formula (without interaction terms involving strata_by variable)
   cox_formula <- as.formula(paste("surv_obj ~", covariate_formula, "+ strata(", strata_by, ") + cluster(", cluster_by, ")"))
 
   # Fit the Cox proportional hazards model
   fit <- coxph(cox_formula, data = data)
 
-  # Return the fit object
-  return(fit)
+  # Return the fit object and the number of phases
+  return(list(fit = fit, n_phases = n_phases, strata_by = strata_by))
 }
