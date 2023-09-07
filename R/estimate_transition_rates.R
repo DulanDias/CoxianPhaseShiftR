@@ -40,8 +40,10 @@ estimate_transition_rates <- function(coxph_object, new_observation) {
   baseline_hazard <- basehaz(coxph_object, newdata = new_observation[1, , drop = FALSE])
 
   # Calculate the transition rates
-  lambda <- exp(linear_predictor) * baseline_hazard$hazard
-  mu <- exp(-linear_predictor) * baseline_hazard$hazard
+  # lambda <- exp(linear_predictor) * baseline_hazard$hazard
+  lambda <- exp(linear_predictor)
+  #mu <- exp(-linear_predictor) * baseline_hazard$hazard
+  mu <- exp(-linear_predictor)
 
   # Return the estimated lambda and mu values
   return(list(lambda = lambda, mu = mu))

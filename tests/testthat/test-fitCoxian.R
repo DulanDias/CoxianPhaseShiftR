@@ -48,8 +48,6 @@ test_that("fitCoxian returns reasonable values", {
 
 test_that("fitCoxian returns correct structure for real dataset for multiple phases", {
 
-  skip(message = "Skipping")
-
   # Load the dataset
   data(los)
 
