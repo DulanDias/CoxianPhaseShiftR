@@ -19,7 +19,7 @@ test_that("fitCoxPhModel returns a coxph object for valid inputs", {
 
   # Test that a coxph object is returned for valid inputs
   fit <- fitCoxPhModel(patient_data, "time", "status", "phase", "patient_id")
-  expect_s3_class(fit, "coxph")
+  expect_s3_class(fit$fit, "coxph")
 })
 
 
@@ -46,5 +46,5 @@ test_that("fitCoxPhModel prints the results correctly", {
   print(summary(fit))
 
   # Check that the fit object is of class "coxph"
-  expect_s3_class(fit, "coxph")
+  expect_s3_class(fit$fit, "coxph")
 })
