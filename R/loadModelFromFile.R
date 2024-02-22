@@ -1,3 +1,4 @@
+#' @export
 loadModelFromFile <- function(filepath) {
   tryCatch({
     model <- readRDS(file = filepath)
