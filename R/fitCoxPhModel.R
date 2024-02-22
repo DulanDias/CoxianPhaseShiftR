@@ -21,7 +21,7 @@
 #'
 #' @importFrom survival coxph Surv
 #' @export
-fitCoxPhModel <- function(data, time, status, strata_by, cluster_by) {
+fitCoxPhModel <- function(data, time, status, strata_by, cluster_by, iter.max = 1000000, eps = 1e-4)) {
   # Load the necessary package
   library(survival)
 
@@ -55,7 +55,7 @@ fitCoxPhModel <- function(data, time, status, strata_by, cluster_by) {
   cox_formula <- as.formula(paste("surv_obj ~", covariate_formula, "+ strata(", strata_by, ") + cluster(", cluster_by, ")"))
 
   # Fit the Cox proportional hazards model
-  fit <- coxph(cox_formula, data = data, control = coxph.control(iter.max = 1000000))
+  fit <- coxph(cox_formula, data = data, control = coxph.control(iter.max = iter.max, eps = eps))
 
   # Return the fit object and the number of phases
   return(list(fit = fit, n_phases = n_phases, strata_by = strata_by))
