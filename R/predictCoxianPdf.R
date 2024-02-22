@@ -4,7 +4,7 @@
 #' for a new observation, based on a trained model object. It uses the current phase and time to adjust the
 #' model's transition rates and calculate the PDF.
 #'
-#' @param model_object A list containing the trained model output, including `fit_result` and `transition_rates`.
+#' @param model_object A list containing the trained model output.
 #'        The `transition_rates` must include lambda (transition rates between phases) and mu (absorption rates).
 #' @param new_observation A dataframe containing the covariate values for the new observation.
 #' @param current_phase An integer specifying the current phase of the process for the new observation.
@@ -28,12 +28,14 @@ predictCoxianPdf <- function(model_object, new_observation, current_phase, curre
     stop("Current phase must be between 1 and the number of phases in the model")
   }
 
-  # Adjust new_observation phase
-  new_observation[[strata_by]] <- current_phase
+  # Adjust the number of phases based on the current phase
+  adjusted_n_phases <- n_phases - current_phase + 1
 
-  # Assuming coxianPdf is a function you have or will implement
-  # This function calculates the PDF of the Coxian phase type model
-  coxian_pdf <- coxianPdf(current_time, unlist(model_object$transition_rates$lambda), unlist(model_object$transition_rates$mu))
+  # Estimate the transition rates using the fitted model
+  transition_rates <- estimate_transition_rates(model_object$fit, new_observation, n_phases = adjusted_n_phases, strata_by = strata_by)
+
+  # Calculate the PDF of the Coxian phase type model at the given time
+  coxian_pdf <- coxianPdf(current_time, unlist(transition_rates$lambda), unlist(transition_rates$mu))
 
   # Return the calculated PDF
   return(coxian_pdf)

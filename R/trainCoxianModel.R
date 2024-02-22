@@ -8,8 +8,7 @@
 #' @param n_phases An integer specifying the total number of phases in the Coxian model.
 #' @param strata_by A string specifying the column name in the training_data used for stratification.
 #'
-#' @return A list containing two elements: `fit_result`, which is the result of fitting the Cox PH model,
-#'         and `transition_rates`, which contains the estimated transition rates between phases.
+#' @return A list containing two elements: `fit_result`, which is the result of fitting the Cox PH model.
 #'
 #' @examples
 #' \dontrun{
@@ -31,13 +30,8 @@ trainCoxianModel <- function(training_data, n_phases, strata_by) {
   }
 
   # Fit the Cox PH model
-  # Assuming fitCoxPhModel is a function you have or will implement
-  fit_result <- fitCoxPhModel(training_data, time_col = "time", status_col = "status", strata_col = strata_by, id_col = "patient_id")
-
-  # Assuming estimate_transition_rates is a function you have or will implement
-  # This function should estimate transition rates based on the fitted Cox PH model
-  transition_rates <- estimate_transition_rates(fit_result, n_phases = n_phases, strata_by = strata_by)
+  fit_result <- fitCoxPhModel(training_data, "time", "status", strata_by, "patient_id")
 
   # Return the fitted model and transition rates
-  return(list(fit_result = fit_result, transition_rates = transition_rates))
+  return(fit_result)
 }
