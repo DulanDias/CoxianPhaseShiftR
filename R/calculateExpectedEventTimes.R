@@ -29,7 +29,7 @@ calculateExpectedEventTimes <- function(model_object, new_observations, n_phases
 
   # Add the estimatedEventTime column
   new_observations <- new_observations %>%
-    mutate(estimatedEventTime = list(calculateExpectedEventTime(model_object, cur_data(), n_phases, cur_data()$phase, cur_data()$time, upper_time, strata_by))) %>%
+    mutate(estimatedEventTime = list(calculateExpectedEventTime(model_object, cur_data(), n_phases, current_phase = cur_data()$phase, current_time = cur_data()$time, upper_time, strata_by))) %>%
     unnest(cols = c(estimatedEventTime))
 
   return(new_observations)
