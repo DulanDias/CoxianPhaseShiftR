@@ -11,9 +11,10 @@
 #'
 #' @keywords internal
 compute_Cin <- function(lambda, mu, i, n) {
+  epsilon <- 1e-10  # Small value to avoid division by zero
   terms <- sapply(1:n, function(j) {
     if (j != i) {
-      return((lambda[j] + mu[j]) / (lambda[j] + mu[j] - lambda[i] - mu[i]))
+      return((lambda[j] + mu[j]) / (lambda[j] + mu[j] - lambda[i] - mu[i] + epsilon))
     } else {
       return(1)
     }
