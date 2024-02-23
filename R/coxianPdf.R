@@ -32,35 +32,44 @@ coxianPdf <- function(t, lambda, mu) {
     stop("t should be a non-negative numeric vector.")
   }
 
-  # Initialize result vector
-  result <- numeric(length(t))
+  # Vectorized boundary condition: when t is 0, the PDF should be 0
+  # Use vectorized ifelse to handle t being a vector
+  result <- ifelse(t == 0, 0, NA_real_)
 
-  # Compute PDF for each element in t
-  for (i in seq_along(t)) {
-    # Boundary condition: when t is 0, the PDF should be 0
-    if (t[i] == 0) {
-      result[i] <- 0
-    } else {
-      m <- length(lambda)
-      # Compute the PDF using a stable method
-      pdf_value <- sum(sapply(1:m, function(j) {
+  # Indices for which the PDF needs to be computed (t != 0)
+  needs_computation <- is.na(result)
+
+  # Only compute PDF for t values that are not zero
+  if (any(needs_computation)) {
+    m <- length(lambda)
+
+    # Calculate PDF values for non-zero t's
+    computed_values <- sapply(t[needs_computation], function(current_t) {
+      # Compute the sum for each phase
+      pdf_components <- sapply(1:m, function(j) {
         lambda_j_mu_j_sum <- lambda[j] + mu[j]
-        # Avoid division by zero or very small numbers by adding a small epsilon
-        epsilon <- .Machine$double.eps
-        inner_sum <- sum(sapply(1:m, function(k) {
+        epsilon <- .Machine$double.eps  # Avoid division by zero
+
+        # Compute inner sum, avoiding self-comparison and division by very small numbers
+        inner_sum <- prod(sapply(1:m, function(k) {
           if (k != j) {
-            lambda_k_mu_k_diff <- lambda[k] + mu[k] - lambda_j_mu_j_sum
-            # Adjust denominator to avoid division by zero
-            return((lambda[k] + mu[k]) / (lambda_k_mu_k_diff + epsilon))
+            # Adjust denominator to ensure numerical stability
+            return((lambda[k] + mu[k]) / (lambda[k] + mu[k] - lambda_j_mu_j_sum + epsilon))
           } else {
             return(1)
           }
         }))
-        # Compute PDF component for j
-        return(inner_sum * lambda_j_mu_j_sum * exp(-lambda_j_mu_j_sum * t[i]))
-      }))
-      result[i] <- pdf_value
-    }
+
+        # Calculate and return the component of the PDF for phase j
+        inner_sum * lambda_j_mu_j_sum * exp(-lambda_j_mu_j_sum * current_t)
+      })
+
+      # Sum up components to get the total PDF value for current_t
+      sum(pdf_components)
+    })
+
+    # Assign computed PDF values back to the corresponding positions in result
+    result[needs_computation] <- computed_values
   }
 
   return(result)
