@@ -22,9 +22,9 @@ coxianPdf <- function(t, lambda, mu) {
     stop("Length of lambda and mu should be the same.")
   }
 
-  # Ensure lambda and mu are numeric vectors
-  if (!is.numeric(lambda) || !is.numeric(mu)) {
-    stop("Both lambda and mu should be numeric vectors.")
+  # Ensure lambda and mu are numeric vectors and non-negative
+  if (!is.numeric(lambda) || !is.numeric(mu) || any(lambda < 0) || any(mu < 0)) {
+    stop("Both lambda and mu should be non-negative numeric vectors.")
   }
 
   # Ensure t is non-negative and numeric
@@ -32,33 +32,38 @@ coxianPdf <- function(t, lambda, mu) {
     stop("t should be a non-negative numeric vector.")
   }
 
-  # Boundary condition: when t is 0, the PDF should be 0
-  # This is vectorized to handle each element of t
-  result <- ifelse(t == 0, 0, NA)
+  # Initialize result vector
+  result <- numeric(length(t))
 
-  # Indices where t is not 0 for further computation
-  t_non_zero_indices <- which(is.na(result))
-
-  if (length(t_non_zero_indices) > 0) {
-    # Only apply the complex calculation to non-zero elements of t
-    t_non_zero <- t[t_non_zero_indices]
-
-    m <- length(lambda)
-
-    # Vector to store results of the computation for non-zero t
-    computed_values <- sapply(t_non_zero, function(current_t) {
-      sum(sapply(1:m, function(i) {
-        inner_sum <- sum(sapply(1:m, function(n) {
-          compute_pn(lambda, mu, n) * compute_Cin(lambda, mu, i, n)
+  # Compute PDF for each element in t
+  for (i in seq_along(t)) {
+    # Boundary condition: when t is 0, the PDF should be 0
+    if (t[i] == 0) {
+      result[i] <- 0
+    } else {
+      m <- length(lambda)
+      # Compute the PDF using a stable method
+      pdf_value <- sum(sapply(1:m, function(j) {
+        lambda_j_mu_j_sum <- lambda[j] + mu[j]
+        # Avoid division by zero or very small numbers by adding a small epsilon
+        epsilon <- .Machine$double.eps
+        inner_sum <- sum(sapply(1:m, function(k) {
+          if (k != j) {
+            lambda_k_mu_k_diff <- lambda[k] + mu[k] - lambda_j_mu_j_sum
+            # Adjust denominator to avoid division by zero
+            return((lambda[k] + mu[k]) / (lambda_k_mu_k_diff + epsilon))
+          } else {
+            return(1)
+          }
         }))
-        return(inner_sum * (lambda[i] + mu[i]) * exp(- (lambda[i] + mu[i]) * current_t))
+        # Compute PDF component for j
+        return(inner_sum * lambda_j_mu_j_sum * exp(-lambda_j_mu_j_sum * t[i]))
       }))
-    })
-
-    # Assign computed values back to the corresponding positions in result
-    result[t_non_zero_indices] <- computed_values
+      result[i] <- pdf_value
+    }
   }
 
   return(result)
 }
+
 
