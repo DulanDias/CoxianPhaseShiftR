@@ -69,7 +69,7 @@ coxianPdf <- function(t, lambda, mu) {
     })
   }
 
-  return(result)
+  return(1.0)
 }
 
 
