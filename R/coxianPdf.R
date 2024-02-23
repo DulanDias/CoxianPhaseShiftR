@@ -17,59 +17,56 @@
 #'
 #' @export
 coxianPdf <- function(t, lambda, mu) {
-  # Check if lambda and mu have the same length
+  # Validate inputs
   if (length(lambda) != length(mu)) {
     stop("Length of lambda and mu should be the same.")
   }
 
-  # Ensure lambda and mu are numeric vectors and non-negative
   if (!is.numeric(lambda) || !is.numeric(mu) || any(lambda < 0) || any(mu < 0)) {
     stop("Both lambda and mu should be non-negative numeric vectors.")
   }
 
-  # Ensure t is non-negative and numeric
   if (any(t < 0) || !is.numeric(t)) {
     stop("t should be a non-negative numeric vector.")
   }
 
-  # Vectorized boundary condition: when t is 0, the PDF should be 0
-  # Use vectorized ifelse to handle t being a vector
-  result <- ifelse(t == 0, 0, NA_real_)
+  # Initialize result vector to safely handle all t values, including 0
+  result <- numeric(length = length(t))
+  result[t == 0] <- 0  # Ensuring PDF is 0 when t is 0
 
-  # Indices for which the PDF needs to be computed (t != 0)
-  needs_computation <- is.na(result)
-
-  # Only compute PDF for t values that are not zero
-  if (any(needs_computation)) {
+  # Proceed with computation only for t > 0
+  valid_t_indices <- t > 0
+  if (any(valid_t_indices)) {
+    valid_t <- t[valid_t_indices]
     m <- length(lambda)
 
-    # Calculate PDF values for non-zero t's
-    computed_values <- sapply(t[needs_computation], function(current_t) {
-      # Compute the sum for each phase
-      pdf_components <- sapply(1:m, function(j) {
-        lambda_j_mu_j_sum <- lambda[j] + mu[j]
-        epsilon <- .Machine$double.eps  # Avoid division by zero
+    # Compute PDF for valid t values
+    result[valid_t_indices] <- sapply(valid_t, function(current_t) {
+      pdf_value <- 0  # Initialize PDF value for the current t
 
-        # Compute inner sum, avoiding self-comparison and division by very small numbers
-        inner_sum <- prod(sapply(1:m, function(k) {
+      for (j in 1:m) {
+        lambda_j <- lambda[j]
+        mu_j <- mu[j]
+        lambda_j_mu_j_sum <- lambda_j + mu_j
+
+        # Calculate the product term in the PDF formula
+        product_term <- sapply(1:m, function(k) {
           if (k != j) {
-            # Adjust denominator to ensure numerical stability
-            return((lambda[k] + mu[k]) / (lambda[k] + mu[k] - lambda_j_mu_j_sum + epsilon))
+            return((lambda[k] + mu[k]) / (lambda[k] + mu[k] - lambda_j_mu_j_sum))
           } else {
             return(1)
           }
-        }))
+        })
 
-        # Calculate and return the component of the PDF for phase j
-        inner_sum * lambda_j_mu_j_sum * exp(-lambda_j_mu_j_sum * current_t)
-      })
+        # Compute the PDF component for phase j
+        phase_component <- prod(product_term) * lambda_j_mu_j_sum * exp(-lambda_j_mu_j_sum * current_t)
 
-      # Sum up components to get the total PDF value for current_t
-      sum(pdf_components)
+        # Accumulate the PDF value
+        pdf_value <- pdf_value + phase_component
+      }
+
+      return(pdf_value)
     })
-
-    # Assign computed PDF values back to the corresponding positions in result
-    result[needs_computation] <- computed_values
   }
 
   return(result)
