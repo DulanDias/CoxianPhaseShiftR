@@ -14,6 +14,7 @@ compute_pn <- function(lambda, mu, n) {
     return(mu[1] / (lambda[1] + mu[1]))
   }
 
-  product_term <- prod(sapply(1:(n-1), function(i) lambda[i] / (lambda[i] + mu[i])))
+  # Using vectorized operations for the product term
+  product_term <- prod(lambda[1:(n-1)] / (lambda[1:(n-1)] + mu[1:(n-1)]))
   return(product_term * mu[n] / (lambda[n] + mu[n]))
 }
