@@ -38,7 +38,7 @@ calculateExpectedEventTime <- function(model_object, new_observation, n_phases, 
   mu <- unlist(transition_rates$mu)
 
   integrand <- function(t) {
-    t * coxian_pdf(t, lambda, mu)
+    t * coxianPdf(t, lambda, mu)
   }
 
   result <- integrate(integrand, lower = current_time, upper = upper_time)
