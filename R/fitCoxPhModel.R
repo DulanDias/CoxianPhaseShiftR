@@ -21,7 +21,7 @@
 #'
 #' @importFrom survival coxph Surv
 #' @export
-fitCoxPhModel <- function(data, time, status, strata_by, cluster_by, iter.max = 1000000, eps = 1e-4)) {
+fitCoxPhModel <- function(data, time, status, strata_by, cluster_by, iter.max = 1000000, eps = 1e-4) {
   # Load the necessary package
   library(survival)
 
