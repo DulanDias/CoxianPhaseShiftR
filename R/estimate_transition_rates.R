@@ -77,8 +77,6 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases = 
     # Get the hazard rate at the specified time
     hazard_rate <- summary(surv_fit, times = new_observation$time[1])$cumhaz
 
-    #print(summary(surv_fit, times = new_observation$time[1]))
-
     # Calculate the transition rates for the current phase
     if(i < n_phases) {
       lambda_list[i] <- exp(linear_predictor) * tail(baseline_hazard$hazard, n = 1) # Transition rate to next phase
