@@ -58,22 +58,26 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases = 
     # Calculate the linear predictor (X %*% beta), including interaction terms
     linear_predictor <- sum(new_observation[1, matching_cols] * cox_coefficients[matching_cols])
 
-    # Calculate the baseline hazard function at the specified time
-    baseline_hazard <- basehaz(coxph_object, newdata = new_observation[1, , drop = FALSE])
+    # Calculate the baseline hazard function
+    baseline_hazard <- basehaz(coxph_object)
 
     # Calculate the survival function at the specified time
     surv_fit <- survfit(coxph_object, newdata = new_observation[1, , drop = FALSE])
 
     # Get the hazard rate at the specified time
     hazard_rate <- summary(surv_fit, times = new_observation$time[1], extend = TRUE)$cumhaz
+    if (length(hazard_rate) == 0) {
+      warning("Transition rates could not be estimated for some phases.")
+      hazard_rate <- NA  # or set to a default value
+    }
 
     # Calculate the transition rates for the current phase
-    if(i < n_phases) {
-      lambda_list[i] <- exp(linear_predictor) * tail(baseline_hazard$hazard, n = 1) # Transition rate to next phase
+    if (i < n_phases) {
+      lambda_list[[i]] <- exp(linear_predictor) * tail(baseline_hazard$hazard, n = 1) # Transition rate to next phase
     } else {
-      lambda_list[i] <- 0 # Transition rate to next phase for the last phase is 0
+      lambda_list[[i]] <- 0 # Transition rate to next phase for the last phase is 0
     }
-    mu_list[i] <- (1 - exp(-tail(baseline_hazard$hazard, n = 1))) * exp(linear_predictor) # Transition rate to absorbing state
+    mu_list[[i]] <- (1 - exp(-tail(baseline_hazard$hazard, n = 1))) * exp(linear_predictor) # Transition rate to absorbing state
   }
 
   # Return the estimated lambda and mu values for each phase
