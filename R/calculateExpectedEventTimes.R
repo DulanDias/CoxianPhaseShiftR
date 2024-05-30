@@ -23,14 +23,25 @@
 #'   print(result_df)
 #' }
 #' @export
-calculateExpectedEventTimes <- function(model_object, new_observations, n_phases, upper_time = 10000, strata_by) {
+calculateExpectedEventTimes <- function(model_object, new_observations, n_phases, upper_time = 10000, strata_by, file_path = NULL) {
   # Ensure that rowwise operations can be performed
   new_observations <- rowwise(new_observations)
 
-  # Add the estimatedEventTime column
-  new_observations <- new_observations %>%
-    mutate(estimatedEventTime = list(calculateExpectedEventTime(model_object, cur_data(), n_phases, current_phase = cur_data()$phase, current_time = cur_data()$time, upper_time, strata_by))) %>%
-    unnest(cols = c(estimatedEventTime))
+  # Define a function to process each row and optionally write to CSV
+  process_and_save_row <- function(row) {
+    row <- as.data.frame(row)  # Convert row to a data frame
+    row$estimatedEventTime <- list(calculateExpectedEventTime(model_object, row, n_phases, current_phase = row$phase, current_time = row$time, upper_time, strata_by))
+    row <- unnest(row, cols = c(estimatedEventTime))
+
+    # Append the row to the CSV file if file_path is provided
+    if (!is.null(file_path)) {
+      write.table(row, file = file_path, sep = ",", row.names = FALSE, col.names = !file.exists(file_path), append = TRUE)
+    }
+  }
+
+  # Apply the function to each row
+  new_observations %>%
+    do({ process_and_save_row(.) })
 
   return(new_observations)
 }
