@@ -17,14 +17,13 @@
 #' @export
 estimate_transition_rates <- function(coxph_object, new_observation, n_phases = NULL, strata_by) {
 
-  # Extract the original data used to fit the model
-  original_data <- attr(coxph_object, "data")
-
   # Ensure the factor levels in new_observation match those in the original model data
   for (col in names(new_observation)) {
     if (is.factor(new_observation[[col]])) {
-      if (!all(levels(new_observation[[col]]) %in% levels(original_data[[col]]))) {
-        stop(paste("Factor levels in column", col, "do not match the original model data."))
+      # Identify mismatching levels
+      mismatching_levels <- setdiff(levels(new_observation[[col]]), levels(original_data[[col]]))
+      if (length(mismatching_levels) > 0) {
+        stop(paste("Factor levels in column", col, "do not match the original model data. Mismatching levels: ", paste(mismatching_levels, collapse = ", ")))
       }
       new_observation[[col]] <- factor(new_observation[[col]], levels = levels(original_data[[col]]))
     }
@@ -75,7 +74,7 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases = 
     surv_fit <- survfit(coxph_object, newdata = new_observation[1, , drop = FALSE])
 
     # Get the hazard rate at the specified time
-    hazard_rate <- summary(surv_fit, times = new_observation$time[1])$cumhaz
+    hazard_rate <- summary(surv_fit, times = new_observation$time[1], extend = TRUE)$cumhaz
 
     # Calculate the transition rates for the current phase
     if(i < n_phases) {
