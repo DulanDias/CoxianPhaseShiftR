@@ -17,6 +17,9 @@
 #' @export
 estimate_transition_rates <- function(coxph_object, new_observation, n_phases = NULL, strata_by) {
 
+  # Extract the original data used to fit the model
+  original_data <- attr(coxph_object, "data")
+
   # Ensure the factor levels in new_observation match those in the original model data
   for (col in names(new_observation)) {
     if (is.factor(new_observation[[col]])) {
