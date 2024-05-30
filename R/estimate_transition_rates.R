@@ -17,26 +17,7 @@
 #' @export
 estimate_transition_rates <- function(coxph_object, new_observation, n_phases = NULL, strata_by) {
 
-  # Extract the original data used to fit the model
-  original_data <- attr(coxph_object, "data")
 
-  # Ensure the factor levels in new_observation match those in the original model data
-  for (col in names(new_observation)) {
-    if (is.factor(new_observation[[col]])) {
-      # Check for mismatching levels
-      original_levels <- levels(original_data[[col]])
-      new_levels <- levels(new_observation[[col]])
-
-      mismatching_levels <- setdiff(new_levels, original_levels)
-
-      if (length(mismatching_levels) > 0) {
-        stop(paste("Factor levels in column", col, "do not match the original model data. Mismatching levels: ", paste(mismatching_levels, collapse = ", ")))
-      }
-
-      # Ensure the factor levels match the original levels
-      new_observation[[col]] <- factor(new_observation[[col]], levels = original_levels)
-    }
-  }
 
   # Check if the input is a valid coxph object
   if(!inherits(coxph_object, "coxph")) {
