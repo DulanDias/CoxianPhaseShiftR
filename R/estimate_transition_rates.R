@@ -17,8 +17,6 @@
 #' @export
 estimate_transition_rates <- function(coxph_object, new_observation, n_phases = NULL, strata_by) {
 
-
-
   # Check if the input is a valid coxph object
   if(!inherits(coxph_object, "coxph")) {
     stop("Input must be a valid coxph object")
@@ -31,6 +29,8 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases = 
 
   # Extract the coefficients from the coxph object
   cox_coefficients <- coef(coxph_object)
+
+  print(cox_coefficients)
 
   # Determine the number of phases from the coxph object if not provided
   if(is.null(n_phases)) {
