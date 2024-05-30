@@ -2,7 +2,6 @@ Package: CoxianPhaseShiftR
 Type: Package
 Title: Fitting and Analysis of Coxian Phase Type Distributions
 Version: 0.1.0
-Date: 2023-09-02
 Authors@R: c(
     person("Dulan", "Dias", email = "ddias01@qub.ac.uk", role = c("aut", "cre")),
     person("Adele H.", "Marshall", email = "a.h.marshall@qub.ac.uk", role = "aut"),
