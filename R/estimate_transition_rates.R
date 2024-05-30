@@ -30,7 +30,8 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases = 
   # Extract the coefficients from the coxph object
   cox_coefficients <- coef(coxph_object)
 
-  print(cox_coefficients)
+  # Replace NA values with 0
+  cox_coefficients[is.na(cox_coefficients)] <- 0
 
   # Determine the number of phases from the coxph object if not provided
   if(is.null(n_phases)) {
