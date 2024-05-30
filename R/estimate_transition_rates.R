@@ -23,12 +23,18 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases = 
   # Ensure the factor levels in new_observation match those in the original model data
   for (col in names(new_observation)) {
     if (is.factor(new_observation[[col]])) {
-      # Identify mismatching levels
-      mismatching_levels <- setdiff(levels(new_observation[[col]]), levels(original_data[[col]]))
+      # Check for mismatching levels
+      original_levels <- levels(original_data[[col]])
+      new_levels <- levels(new_observation[[col]])
+
+      mismatching_levels <- setdiff(new_levels, original_levels)
+
       if (length(mismatching_levels) > 0) {
         stop(paste("Factor levels in column", col, "do not match the original model data. Mismatching levels: ", paste(mismatching_levels, collapse = ", ")))
       }
-      new_observation[[col]] <- factor(new_observation[[col]], levels = levels(original_data[[col]]))
+
+      # Ensure the factor levels match the original levels
+      new_observation[[col]] <- factor(new_observation[[col]], levels = original_levels)
     }
   }
 
