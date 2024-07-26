@@ -22,6 +22,16 @@
 #'                     n_phases = 3, upper_time = 10000, strata_by = "phaseColumn", file_path = "results.csv")
 #'   print(result_df)
 #' }
+#'
+#' #'
+#' @details
+#' To enable parallel processing, the user must set up a parallel plan before calling this
+#' function, for example:
+#' \preformatted{
+#'   library(future)
+#'   plan(multisession, workers = 4)
+#' }
+#'
 #' @export
 calculateExpectedEventTimes <- function(model_object, new_observations, n_phases, upper_time = 10000, strata_by, file_path = NULL) {
   # Convert new_observations to a data frame if it's not already
@@ -43,9 +53,8 @@ calculateExpectedEventTimes <- function(model_object, new_observations, n_phases
     })
   }
 
-  # Apply the calculation in parallel
-  plan(multisession, workers = detectCores())
-  new_observations$estimatedEventTime <- future_map(new_observations, calculate_time)
+  # Apply the calculation in parallel, respecting the user's plan
+  new_observations$estimatedEventTime <- future_map(new_observations, ~ calculate_time(.x))
 
   # Save the results if file_path is provided
   if (!is.null(file_path)) {
