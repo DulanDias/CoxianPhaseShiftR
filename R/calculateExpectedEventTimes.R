@@ -24,40 +24,33 @@
 #' }
 #' @export
 calculateExpectedEventTimes <- function(model_object, new_observations, n_phases, upper_time = 10000, strata_by, file_path = NULL) {
-  # Ensure that rowwise operations can be performed
-  new_observations <- rowwise(new_observations)
+  # Convert new_observations to a data frame if it's not already
+  new_observations <- as.data.frame(new_observations)
 
   # Read existing data if file_path is provided and the file exists
-  if (!is.null(file_path) && file.exists(file_path)) {
-    existing_data <- read.csv(file_path)
+  existing_data <- if (!is.null(file_path) && file.exists(file_path)) {
+    read.csv(file_path)
   } else {
-    existing_data <- NULL
+    NULL
   }
 
-  # Define a function to process each row and optionally write to CSV
-  process_and_save_row <- function(row) {
-    row <- as.data.frame(row)  # Convert row to a data frame
-
-    # Use tryCatch to handle errors in calculateExpectedEventTime
-    row$estimatedEventTime <- list(
-      tryCatch({
-        calculateExpectedEventTime(model_object, row, n_phases, current_phase = row$phase, current_time = row$time, upper_time, strata_by)
-      }, error = function(e) {
-        "ERROR"
-      })
-    )
-
-    row <- unnest(row, cols = c(estimatedEventTime))
-
-    # Append the row to the CSV file if file_path is provided
-    if (!is.null(file_path)) {
-      write.table(row, file = file_path, sep = ",", row.names = FALSE, col.names = !file.exists(file_path), append = TRUE)
-    }
+  # Function to calculate expected event time for a single row
+  calculate_time <- function(row) {
+    tryCatch({
+      calculateExpectedEventTime(model_object, row, n_phases, current_phase = row$phase, current_time = row$time, upper_time, strata_by)
+    }, error = function(e) {
+      return(NA)  # Return NA or any default value on error
+    })
   }
 
-  # Apply the function to each row
-  new_observations %>%
-    do({ process_and_save_row(.) })
+  # Apply the calculation in parallel
+  plan(multisession, workers = detectCores())
+  new_observations$estimatedEventTime <- future_map(new_observations, calculate_time)
+
+  # Save the results if file_path is provided
+  if (!is.null(file_path)) {
+    write.csv(new_observations, file = file_path, row.names = FALSE)
+  }
 
   return(new_observations)
 }

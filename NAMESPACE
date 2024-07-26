@@ -1,1 +1,7 @@
 exportPattern("^[[:alpha:]]+")
+import(dplyr)
+import(parallel)
+import(furrr)
+import(survival)
+importFrom(survival, coxph, Surv)
+importFrom(purrr, map)
