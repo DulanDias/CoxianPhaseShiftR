@@ -36,17 +36,18 @@ calculateExpectedEventTimes <- function(model_object, new_observations, n_phases
     NULL
   }
 
-  # Function to calculate expected event time for a single row
-  calculate_time <- function(row) {
-    tryCatch({
-      calculateExpectedEventTime(model_object, as.data.frame(row), n_phases, current_phase = row$phase, current_time = row$time, upper_time, strata_by)
+  # Initialize the estimatedEventTime column
+  new_observations$estimatedEventTime <- NA
+
+  # Iterate over each row to calculate the expected event time
+  for (i in 1:nrow(new_observations)) {
+    row <- new_observations[i, ]
+    new_observations$estimatedEventTime[i] <- tryCatch({
+      calculateExpectedEventTime(model_object, row, n_phases, current_phase = row$phase, current_time = row$time, upper_time, strata_by)
     }, error = function(e) {
-      return(as.character(e$message))  # Return NA or any default value on error
+      return(NA)  # Return NA or any default value on error
     })
   }
-
-  # Apply the calculation sequentially
-  new_observations$estimatedEventTime <- apply(new_observations, 1, calculate_time)
 
   # Save the results if file_path is provided
   if (!is.null(file_path)) {
