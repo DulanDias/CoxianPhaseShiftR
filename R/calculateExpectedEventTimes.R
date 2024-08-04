@@ -41,7 +41,7 @@ calculateExpectedEventTimes <- function(model_object, new_observations, n_phases
     tryCatch({
       calculateExpectedEventTime(model_object, row, n_phases, current_phase = row$phase, current_time = row$time, upper_time, strata_by)
     }, error = function(e) {
-      return(NA)  # Return NA or any default value on error
+      return(as.character(e$message))  # Return NA or any default value on error
     })
   }
 
