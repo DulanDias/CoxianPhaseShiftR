@@ -47,12 +47,14 @@ calculateExpectedEventTimes <- function(model_object, new_observations, n_phases
     }, error = function(e) {
       return(NA)  # Return NA or any default value on error
     })
+
+    # Save the results if file_path is provided
+    if (!is.null(file_path)) {
+      write.csv(new_observations, file = file_path, row.names = FALSE)
+    }
   }
 
-  # Save the results if file_path is provided
-  if (!is.null(file_path)) {
-    write.csv(new_observations, file = file_path, row.names = FALSE)
-  }
+
 
   return(new_observations)
 }
