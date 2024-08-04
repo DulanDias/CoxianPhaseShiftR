@@ -34,6 +34,7 @@
 #'
 #' @export
 calculateExpectedEventTimes <- function(model_object, new_observations, n_phases, upper_time = 10000, strata_by, file_path = NULL) {
+
   # Convert new_observations to a data frame if it's not already
   new_observations <- as.data.frame(new_observations)
 
