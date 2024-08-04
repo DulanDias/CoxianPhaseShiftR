@@ -34,7 +34,14 @@
 #'
 #' @export
 calculateExpectedEventTimes <- function(model_object, new_observations, n_phases, upper_time = 10000, strata_by, file_path = NULL) {
-  library(future.apply)
+  # Load necessary libraries
+  if (!requireNamespace("future", quietly = TRUE)) {
+    stop("The 'future' package is required but not installed.")
+  }
+  if (!requireNamespace("future.apply", quietly = TRUE)) {
+    stop("The 'future.apply' package is required but not installed.")
+  }
+  future::plan(future::multisession, workers = 4)  # Set up parallel plan
 
   # Convert new_observations to a data frame if it's not already
   new_observations <- as.data.frame(new_observations)
@@ -51,12 +58,12 @@ calculateExpectedEventTimes <- function(model_object, new_observations, n_phases
     tryCatch({
       calculateExpectedEventTime(model_object, row, n_phases, upper_time, strata_by)
     }, error = function(e) {
-      return(NA)  # Return NA or any default value on error
+      return(NA)  # Return NA on error
     })
   }
 
   # Apply the calculation in parallel, respecting the user's plan
-  new_observations$estimatedEventTime <- future_apply(new_observations, 1, calculate_time)
+  new_observations$estimatedEventTime <- future.apply::future_apply(new_observations, 1, function(row) calculate_time(as.list(row)))
 
   # Save the results if file_path is provided
   if (!is.null(file_path)) {
