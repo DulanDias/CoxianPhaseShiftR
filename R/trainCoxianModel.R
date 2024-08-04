@@ -29,8 +29,8 @@ trainCoxianModel <- function(training_data, n_phases, strata_by) {
     stop(paste("Column", strata_by, "not found in training_data"))
   }
 
-  # Fit the Cox PH model
-  fit_result <- fitCoxPhModel(training_data, "time", "status", strata_by, "patient_id")
+  # Fit the Cox PH model without cluster_by
+  fit_result <- fitCoxPhModel(training_data, "time", "status", strata_by)
 
   # Return the fitted model and transition rates
   return(fit_result)
