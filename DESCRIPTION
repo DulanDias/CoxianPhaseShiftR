@@ -20,6 +20,8 @@ Imports:
     parallel,
     furrr,
     survival,
-    purrr
+    purrr,
+    future,
+    future.apply
 RoxygenNote: 7.2.3
 Maintainer: Dulan Dias <ddias01@1ub.ac.uk>

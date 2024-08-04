@@ -2,7 +2,7 @@
 #'
 #' Extends the calculateExpectedEventTime function to handle a dataframe of new observations,
 #' adding an estimatedEventTime column to the dataframe with the expected event time for each observation.
-#' If an error occurs during the calculation for any observation, the function sets the estimatedEventTime to "ERROR"
+#' If an error occurs during the calculation for any observation, the function sets the estimatedEventTime to NA
 #' for that observation and continues processing the remaining observations.
 #'
 #' @param model_object An object containing the fitted model, including transition rates.
@@ -34,6 +34,8 @@
 #'
 #' @export
 calculateExpectedEventTimes <- function(model_object, new_observations, n_phases, upper_time = 10000, strata_by, file_path = NULL) {
+  library(future.apply)
+
   # Convert new_observations to a data frame if it's not already
   new_observations <- as.data.frame(new_observations)
 
@@ -47,14 +49,14 @@ calculateExpectedEventTimes <- function(model_object, new_observations, n_phases
   # Function to calculate expected event time for a single row
   calculate_time <- function(row) {
     tryCatch({
-      calculateExpectedEventTime(model_object, row, n_phases, current_phase = row$phase, current_time = row$time, upper_time, strata_by)
+      calculateExpectedEventTime(model_object, row, n_phases, upper_time, strata_by)
     }, error = function(e) {
       return(NA)  # Return NA or any default value on error
     })
   }
 
   # Apply the calculation in parallel, respecting the user's plan
-  new_observations$estimatedEventTime <- future_map(new_observations, ~ calculate_time(.x))
+  new_observations$estimatedEventTime <- future_apply(new_observations, 1, calculate_time)
 
   # Save the results if file_path is provided
   if (!is.null(file_path)) {
