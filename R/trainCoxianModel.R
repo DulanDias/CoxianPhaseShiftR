@@ -15,8 +15,7 @@
 #'   training_data <- data.frame(
 #'     time = c(5, 10, 15),
 #'     status = c(1, 0, 1),
-#'     phase = c(1, 2, 3),
-#'     patient_id = c(1, 2, 3)
+#'     phase = c(1, 2, 3)
 #'   )
 #'   result <- trainCoxianModel(training_data, n_phases = 3, strata_by = "phase")
 #'   print(result)
