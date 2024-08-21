@@ -1,9 +1,13 @@
 Package: CoxianPhaseShiftR
 Type: Package
 Title: Fitting and Analysis of Coxian Phase Type Distributions
-Version: 0.1.0
-Date: 2023-09-02
-Authors@R: person("Dulan", "Dias", email = "ddias01@1ub.ac.uk", role = c("aut", "cre"))
+Version: 0.2.0
+Date: 2024-08-21
+Authors@R: c(
+    person("Dulan", "Dias", email = "ddias01@1ub.ac.uk", role = c("aut", "cre")),
+    person("Adele H.", "Marshall", email = "a.h.marshall@qub.ac.uk", role = "aut"),
+    person("Aleksandar", "Novakovic", email = "a.novakovic@qub.ac.uk", role = "aut")
+)
 Description: The 'CoxianPhaseShiftR' package provides tools for fitting data to Coxian phase type distributions. 
     It offers functionalities to optimize the parameters of the distribution, evaluate the goodness of fit, 
     and visualize the results. The package introduces the Progressive Coxian Phase Type Model, 
