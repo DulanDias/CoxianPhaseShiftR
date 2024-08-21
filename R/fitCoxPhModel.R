@@ -63,6 +63,6 @@ fitCoxPhModel <- function(data, time, status, strata_by, cluster_by = NULL, iter
   # Fit the Cox proportional hazards model
   fit <- coxph(cox_formula, data = data, control = coxph.control(iter.max = iter.max, eps = eps))
 
-  # Return the fit object and the number of phases
-  return(list(fit = fit, n_phases = n_phases, strata_by = strata_by))
+  # Return the fit object
+  return(fit)
 }
