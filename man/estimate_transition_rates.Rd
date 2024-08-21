@@ -7,7 +7,8 @@
 estimate_transition_rates(
   coxph_object,
   new_observation,
-  n_phases = NULL,
+  n_phases,
+  current_phase,
   strata_by
 )
 }
@@ -16,7 +17,11 @@ estimate_transition_rates(
 
 \item{new_observation}{A data frame with the covariate values for the new observation.}
 
-\item{n_phases}{The number of phases in the Coxian model.}
+\item{n_phases}{The total number of phases in the Coxian model.}
+
+\item{current_phase}{The current phase to start the estimation from.}
+
+\item{strata_by}{A string specifying the column name in new_observation used for stratification, aligning with the model's structure.}
 }
 \value{
 A list containing the estimated lambda and mu values for each phase.
@@ -28,7 +33,7 @@ Estimate Transition Rates
 \dontrun{
   # Assuming fit_result is a coxph object from the fitCoxPhModel function
   # and new_obs is a data frame with the covariate values for the new observation
-  transition_rates <- estimate_transition_rates(fit_result, new_obs, n_phases = 3)
+  transition_rates <- estimate_transition_rates(fit_result, new_obs, n_phases = 3, current_phase = 2)
   print(transition_rates)
 }
 

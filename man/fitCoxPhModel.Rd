@@ -4,10 +4,18 @@
 \alias{fitCoxPhModel}
 \title{Fit Cox Proportional Hazards Model}
 \usage{
-fitCoxPhModel(data, time, status, strata_by, cluster_by)
+fitCoxPhModel(
+  data,
+  time,
+  status,
+  strata_by,
+  cluster_by = NULL,
+  iter.max = 1e+06,
+  eps = 1e-04
+)
 }
 \arguments{
-\item{data}{A data frame containing the data to be used for fitting the model. The data frame must contain columns with names matching the time, status, strata_by, and cluster_by parameters.}
+\item{data}{A data frame containing the data to be used for fitting the model. The data frame must contain columns with names matching the time, status, strata_by parameters, and optionally cluster_by if provided.}
 
 \item{time}{A string specifying the column name in the data frame to be used as the time variable. This column should contain the time until the event of interest or censoring occurs for each observation.}
 
@@ -15,13 +23,13 @@ fitCoxPhModel(data, time, status, strata_by, cluster_by)
 
 \item{strata_by}{A string specifying the column name in the data frame to be used for stratification. Stratification is used to allow for separate baseline hazards for different groups in the data, without estimating separate regression coefficients for the covariates. This can be useful when there is a categorical variable that affects the baseline hazard function but not the hazard ratios.}
 
-\item{cluster_by}{A string specifying the column name in the data frame to be used for clustering. Clustering is used to account for correlations between observations within the same group (e.g., multiple observations from the same patient). The cluster variable defines the groups, and the standard errors of the regression coefficients are adjusted to account for the within-group correlations.}
+\item{cluster_by}{An optional string specifying the column name in the data frame to be used for clustering. Clustering is used to account for correlations between observations within the same group (e.g., multiple observations from the same patient). The cluster variable defines the groups, and the standard errors of the regression coefficients are adjusted to account for the within-group correlations.}
 }
 \value{
 A fit object from the coxph function, which contains the results of the Cox model fit. This object contains various pieces of information about the fitted model, including the regression coefficients, standard errors, and test statistics.
 }
 \description{
-This function fits a Cox proportional hazards model to the input data using specified column names for time, status, strata, and cluster variables. All other columns in the data frame are used as covariates in the model.
+This function fits a Cox proportional hazards model to the input data using specified column names for time, status, strata, and optionally cluster variables. All other columns in the data frame are used as covariates in the model.
 }
 \examples{
 \dontrun{
