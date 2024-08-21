@@ -49,10 +49,6 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases, c
 
   # Loop through each phase to calculate lambda and mu values
   for(i in seq_len(n_phases)) {
-    if(i < current_phase) {
-      lambda_list[[i]] <- 1
-      mu_list[[i]] <- 0
-    } else {
       # Create a new variable in new_observation to match the current phase
       new_observation[[as.symbol(strata_by)]] <- i
 
@@ -82,7 +78,7 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases, c
         lambda_list[[i]] <- 0 # Transition rate to next phase for the last phase is 0
       }
       mu_list[[i]] <- (1 - exp(-tail(baseline_hazard$hazard, n = 1))) * exp(linear_predictor) # Transition rate to absorbing state
-    }
+
   }
 
   # Return the estimated lambda and mu values for each phase
