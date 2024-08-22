@@ -48,7 +48,7 @@ predictProgressiveCoxianModel <- function(model_list, new_observations, n_phases
       calculateExpectedEventTime(
         model_object,
         row,
-        n_p,
+        n_phases,
         current_phase = row[[strata_by]],
         current_time = row$time,
         upper_time,

@@ -43,6 +43,9 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases, c
     stop("current_phase must be a positive integer between 1 and the number of phases")
   }
 
+  # Determine the number of phases in the progressed Coxian model
+  n_p <- n_phases - current_phase + 1
+
   # Initialize lists to store lambda and mu values for each phase
   lambda_list <- vector("list", n_phases)
   mu_list <- vector("list", n_phases)
