@@ -33,6 +33,12 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases, c
   cox_coefficients <- coef(coxph_object)
 
   # Replace NA values with 0
+  # Justification: Setting NA coefficients to zero is the safest approach as it implies that
+  # the corresponding covariate has no effect on the hazard rate (i.e., the hazard ratio for
+  # that covariate would be exp(0) = 1). This avoids introducing artificial effects from
+  # missing coefficients and ensures that covariates with NA coefficients do not distort
+  # the transition rate calculation. It is particularly appropriate when NA values occur due
+  # to insufficient data, non-convergence, or non-significant effects during model fitting.
   cox_coefficients[is.na(cox_coefficients)] <- 0
 
   if(!is.numeric(n_phases) || n_phases <= 0) {
