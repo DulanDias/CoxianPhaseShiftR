@@ -1,68 +1,76 @@
-#' Train Progressive Coxian Model
+#' Fit Cox Proportional Hazards Model
 #'
-#' This function trains a Progressive Coxian phase-type model using the provided training data.
-#' It fits a Cox proportional hazards model and estimates transition rates for the specified number of phases.
+#' This function fits a Cox proportional hazards model to the input data using specified column names for time, status, strata, and optionally cluster variables. All other columns in the data frame are used as covariates in the model.
 #'
-#' @param training_data A dataframe containing the training data, which must include a time-to-event variable (`time`), an event indicator (`event`),
-#'        and any covariates for stratification.
-#' @param n_phases An integer specifying the total number of phases in the Coxian model.
-#' @param strata_by A string specifying the column name in the training_data used for stratification (e.g., "phase").
-#' @param time A string specifying the column name in the training_data that represents the current time variable.
-#' @param event A string specifying the column name in the training_data that represents the event indicator (1 if event occurred, 0 if censored).
-#' @param cluster_by An optional string specifying the column name in the training_data to be used for clustering.
+#' @param data A data frame containing the data to be used for fitting the model. The data frame must contain columns with names matching the time, status, strata_by parameters, and optionally cluster_by if provided.
+#' @param time A string specifying the column name in the data frame to be used as the time variable. This column should contain the time until the event of interest or censoring occurs for each observation.
+#' @param status A string specifying the column name in the data frame to be used as the status variable. This column should contain binary values indicating whether the event of interest occurred (1) or the observation was censored (0).
+#' @param strata_by A string specifying the column name in the data frame to be used for stratification. Stratification is used to allow for separate baseline hazards for different groups in the data, without estimating separate regression coefficients for the covariates. This can be useful when there is a categorical variable that affects the baseline hazard function but not the hazard ratios. Set to `NULL` if no stratification is needed.
+#' @param cluster_by An optional string specifying the column name in the data frame to be used for clustering. Clustering is used to account for correlations between observations within the same group (e.g., multiple observations from the same patient). The cluster variable defines the groups, and the standard errors of the regression coefficients are adjusted to account for the within-group correlations.
 #' @param penalty A string specifying the type of penalty for regularization (e.g., "none", "ridge", "lasso"). Defaults to "none".
 #' @param lambda A numeric value specifying the regularization strength. Defaults to 1.
 #'
-#' @return A list containing the results of the fitted Cox PH models for each phase.
+#' @return A fit object from the coxph function, which contains the results of the Cox model fit. This object contains various pieces of information about the fitted model, including the regression coefficients, standard errors, and test statistics.
 #'
 #' @examples
 #' \dontrun{
-#'   training_data <- data.frame(
-#'     time = c(5, 10, 15, 20, 25),
-#'     event = c(1, 0, 1, 1, 0),
-#'     phase = c(1, 1, 2, 2, 3),
-#'     cluster_id = c(101, 101, 102, 102, 103)
-#'   )
-#'   result <- trainProgressiveCoxianModel(training_data, n_phases = 3, strata_by = "phase", time = "time", event = "event", cluster_by = "cluster_id")
-#'   print(result)
+#'   # Assuming df is a data frame with appropriate columns
+#'   fit_result <- fitCoxPhModel(df, "time_column_name", "status_column_name", "strata_column_name", "cluster_column_name")
+#'
+#'   # Summary of the fit result
+#'   summary(fit_result)
 #' }
 #'
+#' @importFrom survival coxph Surv
 #' @export
-trainProgressiveCoxianModel <- function(training_data, n_phases, strata_by, time, event, cluster_by = NULL, penalty = "none", lambda = 1) {
+fitCoxPhModel <- function(data, time, status, strata_by = NULL, cluster_by = NULL, penalty = "none", lambda = 1, iter.max = 1000000, eps = 1e-4) {
 
-  # Ensure the necessary columns exist in training_data
-  required_columns <- c(time, event, strata_by)
-  if (!is.null(cluster_by)) {
-    required_columns <- c(required_columns, cluster_by)
+  # Check the validity of the inputs
+  if(!is.data.frame(data)) {
+    stop("Input data must be a data frame")
   }
 
-  missing_columns <- setdiff(required_columns, colnames(training_data))
-  if (length(missing_columns) > 0) {
-    stop(paste("The following required columns are missing from training_data:", paste(missing_columns, collapse = ", ")))
+  if(!all(c(time, status) %in% names(data))) {
+    stop("Specified column names are not present in the data frame")
   }
 
-  # Initialize a list to store the results of the fitted models
-  fit_results <- list()
-
-  # Loop over phases, filtering the data and fitting the model
-  for (phase in 1:n_phases) {
-    # Filter the data to include only the relevant phases
-    filtered_data <- training_data[training_data[[strata_by]] >= phase, ]
-
-    # Handle 1-phase model specifically
-    if (n_phases - phase + 1 == 1) {
-      warning("Only one phase remaining, fitting a simplified Cox model without stratification or clustering.")
-      fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by, cluster_by = NULL, penalty = penalty, lambda = lambda)
-    } else {
-      # Fit the Cox PH model with or without clustering
-      fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by, cluster_by, penalty = penalty, lambda = lambda)
-    }
-
-    # Store the result in the list with the phase-specific key
-    phase_key <- paste0(n_phases - phase + 1, "-phase")
-    fit_results[[phase_key]] <- fit_result
+  if(any(sapply(data[, c(time, status)], function(col) any(is.na(col))))) {
+    stop("Specified columns contain NA values")
   }
 
-  # Return the list of fitted models
-  return(fit_results)
+  if (!is.null(cluster_by) && !cluster_by %in% names(data)) {
+    stop("Specified cluster_by column name is not present in the data frame")
+  }
+
+  # Create a Surv object
+  data$surv_obj <- Surv(data[[time]], data[[status]])
+
+  # Get the column names to be used as covariates
+  covariate_columns <- setdiff(names(data), c(time, status, strata_by, cluster_by, "surv_obj"))
+
+  # Create a formula for the coxph function
+  covariate_formula <- paste(covariate_columns, collapse = " + ")
+
+  # Combine the main effects to create the full formula
+  if (!is.null(strata_by) && !is.null(cluster_by)) {
+    cox_formula <- as.formula(paste("surv_obj ~", covariate_formula, "+ strata(", strata_by, ") + cluster(", cluster_by, ")"))
+  } else if (!is.null(strata_by)) {
+    cox_formula <- as.formula(paste("surv_obj ~", covariate_formula, "+ strata(", strata_by, ")"))
+  } else if (!is.null(cluster_by)) {
+    cox_formula <- as.formula(paste("surv_obj ~", covariate_formula, "+ cluster(", cluster_by, ")"))
+  } else {
+    cox_formula <- as.formula(paste("surv_obj ~", covariate_formula))
+  }
+
+  # Add penalization if specified
+  if (penalty == "ridge") {
+    fit <- coxph(cox_formula, data = data, iter.max = iter.max, eps = eps, penalty = ridge(lambda))
+  } else if (penalty == "lasso") {
+    fit <- coxph(cox_formula, data = data, iter.max = iter.max, eps = eps, penalty = lasso(lambda))
+  } else {
+    fit <- coxph(cox_formula, data = data, iter.max = iter.max, eps = eps)
+  }
+
+  # Return the fit object
+  return(fit)
 }

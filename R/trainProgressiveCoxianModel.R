@@ -49,10 +49,14 @@ trainProgressiveCoxianModel <- function(training_data, n_phases, strata_by, time
     # Filter the data to include only the relevant phases
     filtered_data <- training_data[training_data[[strata_by]] >= phase, ]
 
-
-    # Fit the Cox PH model
-    fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by, cluster_by, penalty = penalty, lambda = lambda)
-
+    # Handle 1-phase model specifically
+    if (n_phases - phase + 1 == 1) {
+      warning("Only one phase remaining, fitting a simplified Cox model without stratification or clustering.")
+      fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by = NULL, cluster_by = NULL, penalty = penalty, lambda = lambda)
+    } else {
+      # Fit the Cox PH model with or without clustering
+      fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by, cluster_by, penalty = penalty, lambda = lambda)
+    }
 
     # Store the result in the list with the phase-specific key
     phase_key <- paste0(n_phases - phase + 1, "-phase")
