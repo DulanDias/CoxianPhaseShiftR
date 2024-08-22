@@ -40,6 +40,8 @@ predictProgressiveCoxianModel <- function(model_list, new_observations, n_phases
     # Select the appropriate model from the list
     model_object <- model_list[[phase_key]]
 
+    print(length(unique(model_object$strata)))
+
     # Calculate the expected event time using the selected model
     new_observations$estimatedEventTime[i] <- tryCatch({
       calculateExpectedEventTime(
