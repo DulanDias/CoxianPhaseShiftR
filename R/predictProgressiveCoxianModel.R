@@ -34,20 +34,20 @@ predictProgressiveCoxianModel <- function(model_list, new_observations, n_phases
   for (i in 1:nrow(new_observations)) {
     row <- new_observations[i, ]
 
+    n_p <- n_phases - row[[strata_by]] + 1
+
     # Determine the phase key based on the current phase of the observation
-    phase_key <- paste0(n_phases - row[[strata_by]] + 1, "-phase")
+    phase_key <- paste0(n_p, "-phase")
 
     # Select the appropriate model from the list
     model_object <- model_list[[phase_key]]
-
-    print(length(unique(model_object$strata)))
 
     # Calculate the expected event time using the selected model
     new_observations$estimatedEventTime[i] <- tryCatch({
       calculateExpectedEventTime(
         model_object,
         row,
-        length(unique(model_object$strata)),
+        n_p,
         current_phase = row[[strata_by]],
         current_time = row$time,
         upper_time,
