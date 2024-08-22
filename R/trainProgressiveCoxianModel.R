@@ -10,8 +10,6 @@
 #' @param time A string specifying the column name in the training_data that represents the current time variable.
 #' @param event A string specifying the column name in the training_data that represents the event indicator (1 if event occurred, 0 if censored).
 #' @param cluster_by An optional string specifying the column name in the training_data to be used for clustering.
-#' @param penalty A string specifying the type of penalty for regularization (e.g., "none", "ridge", "lasso"). Defaults to "none".
-#' @param lambda A numeric value specifying the regularization strength. Defaults to 1.
 #'
 #' @return A list containing the results of the fitted Cox PH models for each phase.
 #'
@@ -28,7 +26,7 @@
 #' }
 #'
 #' @export
-trainProgressiveCoxianModel <- function(training_data, n_phases, strata_by, time, event, cluster_by = NULL, penalty = "none", lambda = 1) {
+trainProgressiveCoxianModel <- function(training_data, n_phases, strata_by, time, event, cluster_by = NULL) {
 
   # Ensure the necessary columns exist in training_data
   required_columns <- c(time, event, strata_by)
@@ -52,10 +50,10 @@ trainProgressiveCoxianModel <- function(training_data, n_phases, strata_by, time
     # Handle 1-phase model specifically
     if (n_phases - phase + 1 == 1) {
       warning("Only one phase remaining, fitting a simplified Cox model without stratification or clustering.")
-      fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by = NULL, cluster_by = NULL, penalty = penalty, lambda = lambda)
+      fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by = NULL, cluster_by = NULL)
     } else {
       # Fit the Cox PH model with or without clustering
-      fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by, cluster_by, penalty = penalty, lambda = lambda)
+      fit_result <- fitCoxPhModel(filtered_data, time, event, strata_by, cluster_by)
     }
 
     # Store the result in the list with the phase-specific key

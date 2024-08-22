@@ -7,8 +7,6 @@
 #' @param status A string specifying the column name in the data frame to be used as the status variable. This column should contain binary values indicating whether the event of interest occurred (1) or the observation was censored (0).
 #' @param strata_by A string specifying the column name in the data frame to be used for stratification. Stratification is used to allow for separate baseline hazards for different groups in the data, without estimating separate regression coefficients for the covariates. This can be useful when there is a categorical variable that affects the baseline hazard function but not the hazard ratios. Set to `NULL` if no stratification is needed.
 #' @param cluster_by An optional string specifying the column name in the data frame to be used for clustering. Clustering is used to account for correlations between observations within the same group (e.g., multiple observations from the same patient). The cluster variable defines the groups, and the standard errors of the regression coefficients are adjusted to account for the within-group correlations.
-#' @param penalty A string specifying the type of penalty for regularization (e.g., "none", "ridge", "lasso"). Defaults to "none".
-#' @param lambda A numeric value specifying the regularization strength. Defaults to 1.
 #'
 #' @return A fit object from the coxph function, which contains the results of the Cox model fit. This object contains various pieces of information about the fitted model, including the regression coefficients, standard errors, and test statistics.
 #'
@@ -23,7 +21,7 @@
 #'
 #' @importFrom survival coxph Surv
 #' @export
-fitCoxPhModel <- function(data, time, status, strata_by = NULL, cluster_by = NULL, penalty = "none", lambda = 1, iter.max = 1000000, eps = 1e-4) {
+fitCoxPhModel <- function(data, time, status, strata_by = NULL, cluster_by = NULL, iter.max = 1000000, eps = 1e-4) {
 
   # Check the validity of the inputs
   if(!is.data.frame(data)) {
@@ -62,14 +60,8 @@ fitCoxPhModel <- function(data, time, status, strata_by = NULL, cluster_by = NUL
     cox_formula <- as.formula(paste("surv_obj ~", covariate_formula))
   }
 
-  # Add penalization if specified
-  if (penalty == "ridge") {
-    fit <- coxph(cox_formula, data = data, iter.max = iter.max, eps = eps, penalty = ridge(lambda))
-  } else if (penalty == "lasso") {
-    fit <- coxph(cox_formula, data = data, iter.max = iter.max, eps = eps, penalty = lasso(lambda))
-  } else {
-    fit <- coxph(cox_formula, data = data, iter.max = iter.max, eps = eps)
-  }
+  # Fit the Cox proportional hazards model
+  fit <- coxph(cox_formula, data = data, iter.max = iter.max, eps = eps)
 
   # Return the fit object
   return(fit)
