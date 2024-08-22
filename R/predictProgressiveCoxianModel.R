@@ -45,14 +45,14 @@ predictProgressiveCoxianModel <- function(model_list, new_observations, n_phases
       calculateExpectedEventTime(
         model_object,
         row,
-        n_phases,
+        length(unique(model_object$strata)),
         current_phase = row[[strata_by]],
         current_time = row$time,
         upper_time,
         strata_by
       )
     }, error = function(e) {
-      return(NA)  # Return NA on error
+      return(paste("Error:", e$message))  # Return the error message
     })
 
     # Save the results if file_path is provided
