@@ -19,8 +19,6 @@
 #' @export
 estimate_transition_rates <- function(coxph_object, new_observation, n_phases, current_phase, strata_by) {
 
-  print(class(coxph_object))
-
   # Check if the input is a valid coxph object
   if(!inherits(coxph_object, "coxph")) {
     stop("Input must be a valid coxph object")

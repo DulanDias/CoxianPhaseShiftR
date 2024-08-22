@@ -29,7 +29,7 @@
 calculateExpectedEventTime <- function(model_object, new_observation, n_phases, current_phase, current_time, upper_time = 10000, strata_by){
 
   # Estimate the transition rates using the fitted model
-  transition_rates <- estimate_transition_rates(model_object$fit, new_observation, n_phases = n_phases, current_phase = current_phase, strata_by = strata_by)
+  transition_rates <- estimate_transition_rates(model_object, new_observation, n_phases = n_phases, current_phase = current_phase, strata_by = strata_by)
   if(is.null(transition_rates) || is.na(transition_rates$lambda) || is.na(transition_rates$mu)) {
     warning("Transition rates could not be estimated.")
     return(NA)
