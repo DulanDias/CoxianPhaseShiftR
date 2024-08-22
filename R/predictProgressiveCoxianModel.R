@@ -34,6 +34,7 @@ predictProgressiveCoxianModel <- function(model_list, new_observations, n_phases
   for (i in 1:nrow(new_observations)) {
     row <- new_observations[i, ]
 
+    # Determine the number of phases in the progressed Coxian model
     n_p <- n_phases - row[[strata_by]] + 1
 
     # Determine the phase key based on the current phase of the observation

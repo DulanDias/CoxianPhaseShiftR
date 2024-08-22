@@ -48,7 +48,7 @@ estimate_transition_rates <- function(coxph_object, new_observation, n_phases, c
   mu_list <- vector("list", n_phases)
 
   # Loop through each phase to calculate lambda and mu values
-  for(i in seq_len(n_phases)) {
+  for(i in seq(current_phase, n_phases)) {
       # Create a new variable in new_observation to match the current phase
       new_observation[[as.symbol(strata_by)]] <- i
 
