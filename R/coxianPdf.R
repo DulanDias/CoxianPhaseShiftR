@@ -44,19 +44,16 @@ coxianPdf <- function(t, lambda, mu) {
     }))
   })
 
-  # Initialize result vector
-  result <- numeric(length(t))
-
-  # Compute PDF for each value of t
-  for (i in seq_along(t)) {
-    if (t[i] == 0) {
-      result[i] <- 0
+  # Vectorized calculation of phase components for each t
+  phase_components <- sapply(t, function(t_val) {
+    if (t_val == 0) {
+      return(0)
     } else {
-      phase_components <- lambda_mu_sum * exp(-lambda_mu_sum * t[i])
-      result[i] <- sum(phase_components * product_terms)
+      exp_components <- lambda_mu_sum * exp(-lambda_mu_sum * t_val)
+      return(sum(exp_components * product_terms))
     }
-  }
+  })
 
-  return(result)
+  return(phase_components)
 }
 
