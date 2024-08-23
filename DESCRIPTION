@@ -16,6 +16,7 @@ Imports:
     survival,
     purrr,
     pracma,
+    furrr,
     testthat
 License: GPL-3
 Encoding: UTF-8

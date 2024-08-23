@@ -8,7 +8,7 @@ fitCoxPhModel(
   data,
   time,
   status,
-  strata_by,
+  strata_by = NULL,
   cluster_by = NULL,
   iter.max = 1e+06,
   eps = 1e-04
@@ -21,7 +21,7 @@ fitCoxPhModel(
 
 \item{status}{A string specifying the column name in the data frame to be used as the status variable. This column should contain binary values indicating whether the event of interest occurred (1) or the observation was censored (0).}
 
-\item{strata_by}{A string specifying the column name in the data frame to be used for stratification. Stratification is used to allow for separate baseline hazards for different groups in the data, without estimating separate regression coefficients for the covariates. This can be useful when there is a categorical variable that affects the baseline hazard function but not the hazard ratios.}
+\item{strata_by}{A string specifying the column name in the data frame to be used for stratification. Stratification is used to allow for separate baseline hazards for different groups in the data, without estimating separate regression coefficients for the covariates. This can be useful when there is a categorical variable that affects the baseline hazard function but not the hazard ratios. Set to `NULL` if no stratification is needed.}
 
 \item{cluster_by}{An optional string specifying the column name in the data frame to be used for clustering. Clustering is used to account for correlations between observations within the same group (e.g., multiple observations from the same patient). The cluster variable defines the groups, and the standard errors of the regression coefficients are adjusted to account for the within-group correlations.}
 }
