@@ -38,12 +38,18 @@ calculateExpectedEventTime <- function(model_object, new_observation, n_phases, 
   lambda <- unlist(transition_rates$lambda)
   mu <- unlist(transition_rates$mu)
 
+  # Vectorized integrand function
   integrand <- function(t) {
     t * coxianPdf(t, lambda, mu)
   }
 
-  # Use a more efficient integration method, e.g., pracma's quadgk
-  result <- quadgk(integrand, lower = current_time, upper = upper_time)
+  # Perform integration using quadgk with vectorized integrand
+  result <- tryCatch({
+    quadgk(integrand, lower = current_time, upper = upper_time)
+  }, error = function(e) {
+    warning("Integration failed: ", e$message)
+    return(list(value = NA, message = "Failed"))
+  })
 
   if(result$message == "OK") {
     return(result$value)
