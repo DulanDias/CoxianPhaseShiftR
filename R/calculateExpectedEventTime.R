@@ -26,11 +26,11 @@
 #' }
 #'
 #' @export
-calculateExpectedEventTime <- function(model_object, new_observation, n_phases, current_phase, current_time, upper_time = 10000, strata_by){
+calculateExpectedEventTime <- function(model_object, new_observation, n_phases, current_phase, current_time, upper_time = 10000, strata_by) {
 
   # Estimate the transition rates using the fitted model
   transition_rates <- estimate_transition_rates(model_object, new_observation, n_phases = n_phases, current_phase = current_phase, strata_by = strata_by)
-  if(is.null(transition_rates) || is.na(transition_rates$lambda) || is.na(transition_rates$mu)) {
+  if (is.null(transition_rates) || is.na(transition_rates$lambda) || is.na(transition_rates$mu)) {
     warning("Transition rates could not be estimated.")
     return(NA)
   }
@@ -43,16 +43,16 @@ calculateExpectedEventTime <- function(model_object, new_observation, n_phases, 
     t * coxianPdf(t, lambda, mu)
   }
 
-  # Perform integration using quadgk with vectorized integrand
+  # Perform integration using quadgk with corrected argument names
   result <- tryCatch({
-    quadgk(integrand, lower = current_time, upper = upper_time)
+    quadgk(integrand, a = current_time, b = upper_time)
   }, error = function(e) {
     warning("Integration failed: ", e$message)
-    return(list(value = NA, message = "Failed"))
+    return(NA)
   })
 
-  if(result$message == "OK") {
-    return(result$value)
+  if (!is.na(result)) {
+    return(result)
   } else {
     warning("Integration may not have converged, check lambda and mu values.")
     return(NA)
