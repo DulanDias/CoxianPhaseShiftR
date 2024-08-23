@@ -30,38 +30,33 @@ coxianPdf <- function(t, lambda, mu) {
     stop("t should be a non-negative numeric vector.")
   }
 
-  # Initialize result vector to safely handle all t values, including 0
-  result <- numeric(length = length(t))
-  result[t == 0] <- 0  # Ensuring PDF is 0 when t is 0
+  m <- length(lambda)
+  lambda_mu_sum <- lambda + mu
 
-  # Proceed with computation only for t > 0
-  valid_t_indices <- t > 0
-  if (any(valid_t_indices)) {
-    valid_t <- t[valid_t_indices]
-    m <- length(lambda)
+  # Precompute product terms independent of t
+  product_terms <- sapply(1:m, function(j) {
+    prod(sapply(1:m, function(k) {
+      if (k != j) {
+        return((lambda[k] + mu[k]) / (lambda[k] + mu[k] - lambda_mu_sum[j]))
+      } else {
+        return(1)
+      }
+    }))
+  })
 
-    # Precompute constants that are independent of t
-    lambda_mu_sum <- lambda + mu
-    product_terms <- sapply(1:m, function(j) {
-      prod(sapply(1:m, function(k) {
-        if (k != j) {
-          return((lambda[k] + mu[k]) / (lambda[k] + mu[k] - lambda_mu_sum[j]))
-        } else {
-          return(1)
-        }
-      }))
-    })
+  # Initialize result vector
+  result <- numeric(length(t))
 
-    # Compute PDF for all valid t values using vectorized operations
-    phase_components <- outer(lambda_mu_sum, valid_t, FUN = function(lms, t_val) {
-      lms * exp(-lms * t_val)
-    })
-
-    result[valid_t_indices] <- rowSums(phase_components * product_terms)
+  # Compute PDF for each value of t
+  for (i in seq_along(t)) {
+    if (t[i] == 0) {
+      result[i] <- 0
+    } else {
+      phase_components <- lambda_mu_sum * exp(-lambda_mu_sum * t[i])
+      result[i] <- sum(phase_components * product_terms)
+    }
   }
 
   return(result)
 }
-
-
 
