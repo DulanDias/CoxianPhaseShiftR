@@ -40,36 +40,28 @@ coxianPdf <- function(t, lambda, mu) {
     valid_t <- t[valid_t_indices]
     m <- length(lambda)
 
-    # Compute PDF for valid t values
-    result[valid_t_indices] <- sapply(valid_t, function(current_t) {
-      pdf_value <- 0  # Initialize PDF value for the current t
-
-      for (j in 1:m) {
-        lambda_j <- lambda[j]
-        mu_j <- mu[j]
-        lambda_j_mu_j_sum <- lambda_j + mu_j
-
-        # Calculate the product term in the PDF formula
-        product_term <- sapply(1:m, function(k) {
-          if (k != j) {
-            return((lambda[k] + mu[k]) / (lambda[k] + mu[k] - lambda_j_mu_j_sum))
-          } else {
-            return(1)
-          }
-        })
-
-        # Compute the PDF component for phase j
-        phase_component <- prod(product_term) * lambda_j_mu_j_sum * exp(-lambda_j_mu_j_sum * current_t)
-
-        # Accumulate the PDF value
-        pdf_value <- pdf_value + phase_component
-      }
-
-      return(pdf_value)
+    # Precompute constants that are independent of t
+    lambda_mu_sum <- lambda + mu
+    product_terms <- sapply(1:m, function(j) {
+      prod(sapply(1:m, function(k) {
+        if (k != j) {
+          return((lambda[k] + mu[k]) / (lambda[k] + mu[k] - lambda_mu_sum[j]))
+        } else {
+          return(1)
+        }
+      }))
     })
+
+    # Compute PDF for all valid t values using vectorized operations
+    phase_components <- outer(lambda_mu_sum, valid_t, FUN = function(lms, t_val) {
+      lms * exp(-lms * t_val)
+    })
+
+    result[valid_t_indices] <- rowSums(phase_components * product_terms)
   }
 
   return(result)
 }
+
 
 
