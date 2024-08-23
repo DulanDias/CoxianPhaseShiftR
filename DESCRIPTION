@@ -13,10 +13,9 @@ Imports:
     stats,
     graphics,
     dplyr,
-    parallel,
-    furrr,
     survival,
     purrr,
+    pracma,
     testthat
 License: GPL-3
 Encoding: UTF-8

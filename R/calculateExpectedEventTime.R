@@ -42,7 +42,8 @@ calculateExpectedEventTime <- function(model_object, new_observation, n_phases, 
     t * coxianPdf(t, lambda, mu)
   }
 
-  result <- integrate(integrand, lower = current_time, upper = upper_time)
+  # Use a more efficient integration method, e.g., pracma's quadgk
+  result <- quadgk(integrand, lower = current_time, upper = upper_time)
 
   if(result$message == "OK") {
     return(result$value)
